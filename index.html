@@ -4,22 +4,18 @@
   <meta charset="UTF-8" />
   <title>Car Configurator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { margin: 0; overflow: hidden; }
+  </style>
 </head>
 <body>
 
-<div id="ui">
-  <h2>Car Configurator</h2>
+<!-- THREE CORE -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 
-  <label>Body Color</label>
-  <input type="color" id="colorPicker" value="#ff0000" />
-
-  <button id="toggleWheels">Toggle Wheels</button>
-</div>
-
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-<script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://unpkg.com/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
+<!-- CONTROLS + LOADER (MATCHING VERSION) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
 
 <script src="main.js"></script>
 </body>
