@@ -1,35 +1,29 @@
-function webglAvailable() {
-  try {
-    const canvas = document.createElement("canvas");
-    return !!(
-      window.WebGLRenderingContext &&
-      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
-    );
-  } catch (e) {
-    return false;
-  }
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+camera.position.z = 2;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// FORCE VISIBLE GEOMETRY
+const geometry = new THREE.BoxGeometry();
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
+
+function animate() {
+  requestAnimationFrame(animate);
+  cube.rotation.x += 0.01;
+  cube.rotation.y += 0.01;
+  renderer.render(scene, camera);
 }
 
-if (!webglAvailable()) {
-  document.body.innerHTML = `
-    <div style="
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      height:100vh;
-      background:#111;
-      color:white;
-      font-family:Arial;
-      text-align:center;
-    ">
-      <div>
-        <h2>WebGL Not Supported</h2>
-        <p>This device or browser cannot render 3D content.</p>
-        <p>Please open this site on a desktop/laptop browser.</p>
-      </div>
-    </div>
-  `;
-  throw new Error("WebGL not supported");
-}
-
-alert("WebGL IS AVAILABLE");
+animate();
