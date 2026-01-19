@@ -17,3 +17,19 @@ html, body {
   width: 200px;
   z-index: 10;
 }
+
+#ui h2 {
+  margin-top: 0;
+}
+
+#ui label {
+  display: block;
+  margin-top: 10px;
+}
+
+#ui button {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px;
+  cursor: pointer;
+}
