@@ -1,29 +1,101 @@
+// ---------- BASIC SETUP ----------
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000);
+scene.background = new THREE.Color(0x111111);
 
 const camera = new THREE.PerspectiveCamera(
-  75,
+  60,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
 );
-camera.position.z = 2;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
-// FORCE VISIBLE GEOMETRY
-const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+// ---------- CONTROLS ----------
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
 
+// ---------- LIGHTS ----------
+scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+dirLight.position.set(5, 10, 5);
+scene.add(dirLight);
+
+// ---------- LOAD CAR MODEL ----------
+let carModel;
+let wheels = [];
+
+const loader = new THREE.GLTFLoader();
+loader.load(
+  "./assets/car.glb",
+  (gltf) => {
+    carModel = gltf.scene;
+    scene.add(carModel);
+
+    carModel.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+
+        if (child.name.toLowerCase().includes("wheel")) {
+          wheels.push(child);
+        }
+      }
+    });
+
+    // AUTO CAMERA FRAME
+    const box = new THREE.Box3().setFromObject(carModel);
+    const size = box.getSize(new THREE.Vector3()).length();
+    const center = box.getCenter(new THREE.Vector3());
+
+    controls.target.copy(center);
+    camera.position.set(
+      center.x + size * 1.2,
+      center.y + size * 0.5,
+      center.z + size * 1.2
+    );
+    camera.lookAt(center);
+  },
+  undefined,
+  (error) => {
+    console.error("GLB load error:", error);
+  }
+);
+
+// ---------- UI: BODY COLOR ----------
+document.getElementById("colorPicker").addEventListener("input", (e) => {
+  if (!carModel) return;
+  const color = new THREE.Color(e.target.value);
+
+  carModel.traverse((child) => {
+    if (child.isMesh && child.material) {
+      child.material.color.set(color);
+    }
+  });
+});
+
+// ---------- UI: TOGGLE WHEELS ----------
+let wheelsVisible = true;
+document.getElementById("toggleWheels").addEventListener("click", () => {
+  wheelsVisible = !wheelsVisible;
+  wheels.forEach(wheel => wheel.visible = wheelsVisible);
+});
+
+// ---------- RESIZE ----------
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ---------- ANIMATE ----------
 function animate() {
   requestAnimationFrame(animate);
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
+  controls.update();
   renderer.render(scene, camera);
 }
-
 animate();
