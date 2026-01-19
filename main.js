@@ -1,56 +1,35 @@
-// PROOF BACKGROUND
-document.body.style.margin = "0";
-document.body.style.overflow = "hidden";
-
-// SCENE
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x202020);
-
-// CAMERA
-const camera = new THREE.PerspectiveCamera(
-  60,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
-camera.position.set(0, 2, 5);
-
-// RENDERER (FORCED ATTACH)
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
-document.body.appendChild(renderer.domElement);
-
-// CONTROLS
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-
-// LIGHTS
-scene.add(new THREE.AmbientLight(0xffffff, 1));
-
-const dir = new THREE.DirectionalLight(0xffffff, 1);
-dir.position.set(5, 10, 5);
-scene.add(dir);
-
-// TEST OBJECT (ABSOLUTE PROOF)
-const cube = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 1, 1),
-  new THREE.MeshStandardMaterial({ color: 0xff0000 })
-);
-scene.add(cube);
-
-// ANIMATE
-function animate() {
-  requestAnimationFrame(animate);
-  cube.rotation.y += 0.01;
-  controls.update();
-  renderer.render(scene, camera);
+function webglAvailable() {
+  try {
+    const canvas = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
+    );
+  } catch (e) {
+    return false;
+  }
 }
-animate();
 
-// RESIZE
-window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
+if (!webglAvailable()) {
+  document.body.innerHTML = `
+    <div style="
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height:100vh;
+      background:#111;
+      color:white;
+      font-family:Arial;
+      text-align:center;
+    ">
+      <div>
+        <h2>WebGL Not Supported</h2>
+        <p>This device or browser cannot render 3D content.</p>
+        <p>Please open this site on a desktop/laptop browser.</p>
+      </div>
+    </div>
+  `;
+  throw new Error("WebGL not supported");
+}
+
+alert("WebGL IS AVAILABLE");
