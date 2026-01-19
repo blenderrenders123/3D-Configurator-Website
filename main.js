@@ -1,7 +1,3 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
-import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
-import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
-
 // ---------- SCENE ----------
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x111111);
@@ -18,14 +14,14 @@ camera.position.set(5, 3, 6);
 // ---------- RENDERER ----------
 const canvas = document.getElementById("three-canvas");
 const renderer = new THREE.WebGLRenderer({
-  canvas,
-  antialias: true,
+  canvas: canvas,
+  antialias: true
 });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 
 // ---------- CONTROLS ----------
-const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
 // ---------- LIGHTS ----------
@@ -35,19 +31,26 @@ const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
 dirLight.position.set(5, 10, 5);
 scene.add(dirLight);
 
-// ---------- LOAD MODEL ----------
+// ---------- TEST CUBE (PROOF RENDERING WORKS) ----------
+const testCube = new THREE.Mesh(
+  new THREE.BoxGeometry(1, 1, 1),
+  new THREE.MeshStandardMaterial({ color: 0xff0000 })
+);
+scene.add(testCube);
+
+// ---------- LOAD CAR MODEL ----------
 let carModel;
 let wheels = [];
 
-const loader = new GLTFLoader();
+const loader = new THREE.GLTFLoader();
 loader.load(
   "./assets/car.glb",
-  (gltf) => {
+  function (gltf) {
     carModel = gltf.scene;
+    scene.remove(testCube); // remove test cube once model loads
     scene.add(carModel);
 
-    // Collect wheels (by name)
-    carModel.traverse((child) => {
+    carModel.traverse(function (child) {
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
@@ -58,7 +61,7 @@ loader.load(
       }
     });
 
-    // AUTO-FRAME CAMERA (VERY IMPORTANT)
+    // AUTO CAMERA FRAME
     const box = new THREE.Box3().setFromObject(carModel);
     const size = box.getSize(new THREE.Vector3()).length();
     const center = box.getCenter(new THREE.Vector3());
@@ -72,38 +75,31 @@ loader.load(
     camera.lookAt(center);
   },
   undefined,
-  (error) => {
+  function (error) {
     console.error("GLB load error:", error);
   }
 );
 
-// ---------- UI: BODY COLOR ----------
-document.getElementById("colorPicker").addEventListener("input", (e) => {
+// ---------- UI ----------
+document.getElementById("colorPicker").addEventListener("input", function (e) {
   if (!carModel) return;
   const color = new THREE.Color(e.target.value);
 
-  carModel.traverse((child) => {
-    if (child.isMesh) {
-      // Change only paint-like materials
-      if (
-        child.material &&
-        ["Body", "Paint", "CarPaint"].includes(child.material.name)
-      ) {
-        child.material.color.set(color);
-      }
+  carModel.traverse(function (child) {
+    if (child.isMesh && child.material) {
+      child.material.color.set(color);
     }
   });
 });
 
-// ---------- UI: TOGGLE WHEELS ----------
 let wheelsVisible = true;
-document.getElementById("toggleWheels").addEventListener("click", () => {
+document.getElementById("toggleWheels").addEventListener("click", function () {
   wheelsVisible = !wheelsVisible;
-  wheels.forEach((wheel) => (wheel.visible = wheelsVisible));
+  wheels.forEach(w => (w.visible = wheelsVisible));
 });
 
 // ---------- RESIZE ----------
-window.addEventListener("resize", () => {
+window.addEventListener("resize", function () {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
