@@ -1,12 +1,19 @@
 // ---------- BASIC SETUP ----------
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x111111);
-
-const camera = new THREE.PerspectiveCamera(
-  60,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
+const loader = new THREE.GLTFLoader();
+loader.load(
+  "./assets/car.glb",
+  (gltf) => {
+    console.log("GLB LOADED SUCCESSFULLY");
+    carModel = gltf.scene;
+    scene.add(carModel);
+  },
+  (xhr) => {
+    console.log("Loading progress:", (xhr.loaded / xhr.total) * 100 + "%");
+  },
+  (error) => {
+    console.error("GLB LOAD FAILED:", error);
+    alert("GLB failed to load. Check console.");
+  }
 );
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -30,8 +37,8 @@ let carModel;
 let wheels = [];
 
 const loader = new THREE.GLTFLoader();
-loader.load(
-  "./assets/car.glb",
+loader.load("./assets/car.glb",
+
   (gltf) => {
     carModel = gltf.scene;
     scene.add(carModel);
@@ -99,3 +106,4 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
+
